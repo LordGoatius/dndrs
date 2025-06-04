@@ -1,13 +1,12 @@
 use serde::{Deserialize, Serialize};
 
-use crate::items::{Armor, Tool, Weapon};
+use crate::items::{ArmorType, Tool, Weapon};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Proficiencies<'a> {
+    pub armor: Vec<ArmorType>,
     #[serde(borrow)]
-    armor: Vec<Armor<'a>>,
+    pub tools: Vec<Tool<'a>>,
     #[serde(borrow)]
-    tools: Vec<Tool<'a>>,
-    #[serde(borrow)]
-    weapons: Vec<Weapon<'a>>,
+    pub weapons: Vec<Weapon<'a>>,
 }

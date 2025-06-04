@@ -3,14 +3,24 @@ use serde::{Deserialize, Serialize};
 pub mod consts;
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct Dice(u8);
+pub struct Dice {
+    pub times: u8,
+    pub die: u8
+}
 
 pub trait Rollable {
+    /// Should only ever be used for a D20
+    /// Refactor to return a RollResult which contains all rolls made, adv/dis tracked?
+    /// TODO: that
     fn roll_skill(&self, advantage: u8, disadvantage: u8) -> u8;
-    fn roll_amount(&self, times: u8) -> usize;
+    /// For rolls such as 1d8 or 10d10
+    fn roll_amount(&self) -> usize;
 }
 
 impl Rollable for Dice {
+    /// Should only ever be used for a D20
+    /// Refactor to return a RollResult which contains all rolls made, adv/dis tracked?
+    /// TODO: that
     fn roll_skill(&self, advantage: u8, disadvantage: u8) -> u8 {
         let (cmpfn, mut num): (fn(u8, u8) -> u8, _) = if advantage >= disadvantage {
             (std::cmp::max, advantage - disadvantage)
@@ -18,7 +28,7 @@ impl Rollable for Dice {
             (std::cmp::min, disadvantage - advantage)
         };
 
-        let range = 1..=self.0;
+        let range = 1..=self.die;
         let mut rand = rand::rng();
 
         let mut val = rand.random_range(range.clone());
@@ -31,11 +41,24 @@ impl Rollable for Dice {
         val
     }
 
-    fn roll_amount(&self, times: u8) -> usize {
-        let range = 1..=self.0 as usize;
+    fn roll_amount(&self) -> usize {
+        let range = 1..=self.die as usize;
         let mut rand = rand::rng();
 
-        (0..times).map(|_| rand.random_range(range.clone())).sum()
+        (0..self.times).map(|_| rand.random_range(range.clone())).sum()
+    }
+}
+
+impl Dice {
+    pub fn upgrade_times_mut(&mut self, upgrade: u8) {
+        self.times += upgrade;
+    }
+
+    pub fn upgrade_times(self, upgrade: u8) -> Dice {
+        Dice {
+            times: self.times + upgrade,
+            die: self.die
+        }
     }
 }
 
@@ -47,7 +70,7 @@ pub mod tests {
 
     #[test]
     fn roll_avg() {
-        let dice = [D4, D6, D8, D10, D12, D20, D100];
+        let dice = [SIXD4, SIXD6, SIXD8, SIXD10, SIXD12, SIXD20, SIXD100];
         let expt = [2.5, 3.5, 4.5, 5.5, 6.5, 10.5, 50.5];
 
         for (i, die) in dice.into_iter().enumerate() {

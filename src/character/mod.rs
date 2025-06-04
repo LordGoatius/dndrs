@@ -130,7 +130,7 @@ impl Character<'_> {
 
 #[cfg(test)]
 pub mod test {
-    use crate::{character::{skills::Skill, Character, SavingThrows, Speed}, dice};
+    use crate::{character::{proficiencies::Proficiencies, skills::Skill, Character, SavingThrows, Speed}, dice, items::{ArmorType, Tool}};
 
     use super::{
         class::Class,
@@ -186,6 +186,12 @@ pub mod test {
 
         let hp = 52;
 
+        let proficiencies = Proficiencies {
+            armor: vec![ArmorType::Light, ArmorType::Medium],
+            tools: vec![Tool::HerbalismKit],
+            weapons: vec![],
+        };
+
         let liza = Character {
             level,
             stats,
@@ -194,6 +200,7 @@ pub mod test {
             speed,
             class,
             hp,
+            proficiencies,
         };
 
         use super::skills::SkillOption::*;
