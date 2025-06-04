@@ -6,7 +6,7 @@ edition = "2024"
 [dependencies]
 anyhow = "1.0.98"
 approx = "0.5.1"
-derive_more = { version = "2.0.1", features = ["display"] }
+derive_more = { version = "2.0.1", features = ["display", "debug"] }
 rand = "0.9.1"
 serde = { version = "1.0.219", features = ["derive"] }
 thiserror = "2.0.12"
