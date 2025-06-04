@@ -1,7 +1,10 @@
 use serde::{Deserialize, Serialize};
 
+use crate::dice::{Dice, Rollable};
+
 #[derive(Debug, Serialize, Deserialize)]
-pub struct Class {
-    pub class_name: String,
-    pub hit_dice: Dice::D6;
+pub struct Class<'a> {
+    pub class_name: &'a str,
+    pub hit_dice: Dice,
+
 }

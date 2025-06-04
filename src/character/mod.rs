@@ -3,21 +3,37 @@ pub mod error;
 pub mod level;
 pub mod skills;
 pub mod stats;
+pub mod proficiencies;
 
-use std::fmt::Display;
+use std::{fmt::Display, ops::Index};
 
 use class::Class;
 use level::Level;
+use proficiencies::Proficiencies;
 use serde::{Deserialize, Serialize};
 use skills::{Skill, SkillOption};
 use stats::Stats;
 
+use crate::dice::{self, Rollable};
+
 #[derive(Debug, Serialize, Deserialize)]
-pub struct Character {
+pub struct Character<'a> {
     level: Level,
     stats: Stats,
     skills: Skill,
-    class: Vec<Class>,
+    saving_throws: SavingThrows,
+    speed: Speed,
+    #[serde(borrow)]
+    class: Vec<Class<'a>>,
+    hp: usize,
+    proficiencies: Proficiencies<'a>
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Speed {
+    walking: usize,
+    swimming: usize,
+    flying: usize
 }
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize)]
@@ -28,6 +44,31 @@ pub enum Ability {
     Int,
     Wis,
     Chr,
+}
+
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+pub struct SavingThrows {
+    str: Prof,
+    dex: Prof,
+    con: Prof,
+    int: Prof,
+    wis: Prof,
+    chr: Prof 
+}
+
+impl Index<Ability> for SavingThrows {
+    type Output = Prof;
+
+    fn index(&self, index: Ability) -> &Self::Output {
+        match index {
+            Ability::Str => &self.str,
+            Ability::Dex => &self.dex,
+            Ability::Con => &self.con,
+            Ability::Int => &self.int,
+            Ability::Wis => &self.wis,
+            Ability::Chr => &self.chr,
+        }
+    }
 }
 
 impl Display for Ability {
@@ -50,25 +91,49 @@ pub enum Prof {
     Expert,
 }
 
-impl Character {
+impl Character<'_> {
     pub fn skill_bonus(&self, skill: SkillOption) -> i8 {
         let prof = self.skills[skill];
-        println!("Prof: {prof:?}");
         let bonus = self.level.prof_bonus() as i8;
-        println!("Prof Bonus: {bonus}");
         let ability: Ability = skill.into();
         let modifier = self.stats.calculate_mod(ability);
-        println!("{ability} Mod: {modifier}");
         (prof as i8 * bonus) + modifier
+    }
+
+    pub fn saving_throw(&self, ability: Ability) -> i8 {
+        let prof = self.saving_throws[ability];
+        let bonus = self.level.prof_bonus() as i8;
+        let modifier = self.stats.calculate_mod(ability);
+        (prof as i8 * bonus) + modifier
+    }
+
+    // TODO: Overrides for observant feat etc
+    pub fn passive_skills(&self, skill: SkillOption) -> u8 {
+        match skill {
+            SkillOption::Perception
+            | SkillOption::Investigation
+            | SkillOption::Insight => {
+                let skill_bonus = self.skill_bonus(skill);
+                (10 + skill_bonus) as u8
+            }
+            _ => panic!("{skill} is not a valid passive skill")
+        }
+    }
+
+    pub fn roll_skill(&self, skill: SkillOption, advantage: u8, disadvantage: u8) -> u8 {
+        let roll = dice::consts::D20.roll_skill(advantage, disadvantage) as i8;
+        let skill_bonus = self.skill_bonus(skill);
+        (roll + skill_bonus) as u8
+
     }
 }
 
 #[cfg(test)]
 pub mod test {
-    use crate::character::{skills::Skill, Character};
+    use crate::{character::{skills::Skill, Character, SavingThrows, Speed}, dice};
 
     use super::{
-        class::{Class, ClassOption},
+        class::Class,
         level::Level,
         stats::Stats,
     };
@@ -98,18 +163,38 @@ pub mod test {
             performance: P::None,
             persuasion: P::None,
         };
+
         let class = vec![Class {
-            class: ClassOption::Druid,
+            class_name: "Druid".into(),
+            hit_dice: dice::consts::D6,
         }];
+
+        let saving_throws = SavingThrows {
+            str: P::None,
+            dex: P::None,
+            con: P::None,
+            int: P::Proficient,
+            wis: P::Proficient,
+            chr: P::None,
+        };
+
+        let speed = Speed {
+            walking: 30,
+            swimming: 15,
+            flying: 0,
+        };
+
+        let hp = 52;
 
         let liza = Character {
             level,
             stats,
             skills,
+            saving_throws,
+            speed,
             class,
+            hp,
         };
-
-        println!("{liza:#?}");
 
         use super::skills::SkillOption::*;
 
@@ -148,5 +233,7 @@ pub mod test {
             println!("{skill}");
             assert_eq!(liza.skill_bonus(skill), values[i]);
         }
+
+        println!("{liza:#?}");
     }
 }

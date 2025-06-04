@@ -68,9 +68,9 @@ pub enum SkillOption {
     Persuasion
 }
 
-impl Into<Ability> for SkillOption {
-    fn into(self) -> Ability {
-        match self {
+impl From<SkillOption> for Ability {
+    fn from(skill: SkillOption) -> Ability {
+        match skill {
             // Dex
             SkillOption::Acrobatics => Ability::Dex,
             SkillOption::Stealing => Ability::Dex,
