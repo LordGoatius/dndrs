@@ -108,11 +108,16 @@ pub mod tests {
 
         for (i, die) in dice.into_iter().enumerate() {
             let avg_many = (0..0xffff)
-                .map(|_| die.roll_amount(6) as f64)
+                .map(|_| die.roll_amount() as f64)
                 .sum::<f64>()
                 / 0xffff as f64;
 
             assert_relative_eq!(avg_many, expt[i], max_relative = 0.05);
         }
+    }
+
+    #[test]
+    fn test_roll() {
+        println!("{}", D20.roll_skill(0, 0));
     }
 }

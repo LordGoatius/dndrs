@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 // Using an enum for level is probably unnecessary, but I think it's reasonably okay here.
 #[repr(u8)]
-#[derive(Debug, Copy, Clone, Deserialize, Serialize)]
+#[derive(Debug, Copy, Clone, Deserialize, Serialize, PartialEq, Eq, PartialOrd, Ord)]
 pub enum Level {
     L01,
     L02,

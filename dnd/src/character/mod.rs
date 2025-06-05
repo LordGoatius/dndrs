@@ -1,9 +1,10 @@
 pub mod class;
 pub mod error;
 pub mod level;
+pub mod proficiencies;
 pub mod skills;
 pub mod stats;
-pub mod proficiencies;
+pub mod spells;
 
 use std::{fmt::Display, ops::Index};
 
@@ -14,7 +15,10 @@ use serde::{Deserialize, Serialize};
 use skills::{Skill, SkillOption};
 use stats::Stats;
 
-use crate::dice::{self, Rollable};
+use crate::{
+    dice::{self, Rollable},
+    languages::Language,
+};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Character<'a> {
@@ -26,14 +30,16 @@ pub struct Character<'a> {
     #[serde(borrow)]
     class: Vec<Class<'a>>,
     hp: usize,
-    proficiencies: Proficiencies<'a>
+    proficiencies: Proficiencies<'a>,
+    // species: Species,
+    languages: Vec<Language<'a>>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Speed {
     walking: usize,
     swimming: usize,
-    flying: usize
+    flying: usize,
 }
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize)]
@@ -53,7 +59,7 @@ pub struct SavingThrows {
     con: Prof,
     int: Prof,
     wis: Prof,
-    chr: Prof 
+    chr: Prof,
 }
 
 impl Index<Ability> for SavingThrows {
@@ -110,13 +116,11 @@ impl Character<'_> {
     // TODO: Overrides for observant feat etc
     pub fn passive_skills(&self, skill: SkillOption) -> u8 {
         match skill {
-            SkillOption::Perception
-            | SkillOption::Investigation
-            | SkillOption::Insight => {
+            SkillOption::Perception | SkillOption::Investigation | SkillOption::Insight => {
                 let skill_bonus = self.skill_bonus(skill);
                 (10 + skill_bonus) as u8
             }
-            _ => panic!("{skill} is not a valid passive skill")
+            _ => panic!("{skill} is not a valid passive skill"),
         }
     }
 
@@ -124,19 +128,22 @@ impl Character<'_> {
         let roll = dice::consts::D20.roll_skill(advantage, disadvantage) as i8;
         let skill_bonus = self.skill_bonus(skill);
         (roll + skill_bonus) as u8
-
     }
 }
 
 #[cfg(test)]
 pub mod test {
-    use crate::{character::{proficiencies::Proficiencies, skills::Skill, Character, SavingThrows, Speed}, dice, items::{ArmorType, Tool}};
-
-    use super::{
-        class::Class,
-        level::Level,
-        stats::Stats,
+    use crate::{
+        character::{
+            class::Subclass, proficiencies::Proficiencies, skills::Skill, Character, SavingThrows,
+            Speed,
+        },
+        dice,
+        items::{ArmorType, Tool},
+        languages::Language,
     };
+
+    use super::{class::Class, level::Level, stats::Stats};
 
     #[test]
     fn char_debug() {
@@ -164,10 +171,33 @@ pub mod test {
             persuasion: P::None,
         };
 
-        let class = vec![Class {
-            class_name: "Druid".into(),
-            hit_dice: dice::consts::D6,
-        }];
+        let class = {
+            use Level::*;
+            vec![
+                Class {
+                    class_name: "Druid".into(),
+                    hit_dice: dice::consts::D8,
+                    level: Level::L06,
+                    asi: vec![L04, L08, L12, L16, L19],
+                    class_features: vec![],
+                    subclass: Subclass {
+                        subclass_name: "Circle of the Dire Beast",
+                        subclass_features: vec![],
+                    },
+                },
+                Class {
+                    class_name: "Warlock".into(),
+                    hit_dice: dice::consts::D8,
+                    level: Level::L01,
+                    asi: vec![L04, L08, L12, L16, L19],
+                    class_features: vec![],
+                    subclass: Subclass {
+                        subclass_name: "Warlock of the Thicket and Thorn",
+                        subclass_features: vec![],
+                    },
+                },
+            ]
+        };
 
         let saving_throws = SavingThrows {
             str: P::None,
@@ -192,6 +222,11 @@ pub mod test {
             weapons: vec![],
         };
 
+        let languages = {
+            use Language::*;
+            vec![Druidic, Common, Elvish, Sylvan]
+        };
+
         let liza = Character {
             level,
             stats,
@@ -201,6 +236,7 @@ pub mod test {
             class,
             hp,
             proficiencies,
+            languages,
         };
 
         use super::skills::SkillOption::*;
