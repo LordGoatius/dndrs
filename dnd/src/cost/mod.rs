@@ -1,4 +1,10 @@
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct Cost;
+pub enum Cost {
+    CP(usize),
+    SP(usize),
+    EP(usize),
+    GP(usize),
+    PP(usize)
+}

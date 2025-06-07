@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
 
-use crate::{cost::Cost, time::Time};
+use crate::cost::Cost;
+pub mod consts;
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Eq, PartialOrd, Ord)]
 pub enum SpellLevel {
@@ -19,23 +20,26 @@ pub enum SpellLevel {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Spell<'a> {
     name: &'a str,
-    descroption: &'a str,
     level: SpellLevel,
-    casting_time: Time,
-    duration: Time,
-    range: SpellRange,
-    effect: MagicEffect,
-    components: Components<'a>,
     school: School,
-    concentration: bool,
-    // target: todo!() is this really necessary?
+    casting_time: &'a str,
+    // TODO: use a time unit
+    // casting_time: Time,
+    range: &'a str,
+    duration: &'a str,
+    components: Components<'a>,
+    description: &'a str,
+    // effect: MagicEffect<'a>,
 }
 
 // TODO
-#[derive(Debug, Serialize, Deserialize)]
-pub enum MagicEffect {
-    
-}
+// #[derive(Debug, Serialize, Deserialize)]
+// pub enum MagicEffect<'a> {
+//     AttackRoll(AttackRoll),
+//     // DC is calculated using spell save DC
+//     SavingThrow(Ability),
+//     Misc(&'a str)
+// }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub enum SpellRange {

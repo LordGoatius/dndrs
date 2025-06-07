@@ -1,7 +1,7 @@
 use derive_more::{Debug, Display};
 use serde::{Deserialize, Serialize};
 
-use crate::{damage::DamageType, dice::Dice, time::Time};
+use crate::{attack::DamageType, dice::Dice, time::Time};
 
 pub mod consts;
 
