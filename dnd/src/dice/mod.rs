@@ -2,7 +2,7 @@ use rand::{self, Rng};
 use serde::{Deserialize, Serialize};
 pub mod consts;
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Dice {
     pub times: u8,
     pub die: u8
@@ -103,7 +103,7 @@ pub mod tests {
 
     #[test]
     fn roll_avg_multiple() {
-        let dice = [D4, D6, D8, D10, D12, D20, D100];
+        let dice = [SIXD4, SIXD6, SIXD8, SIXD10, SIXD12, SIXD20, SIXD100];
         let expt  = [2.5, 3.5, 4.5, 5.5, 6.5, 10.5, 50.5].map(|val| val * 6.0);
 
         for (i, die) in dice.into_iter().enumerate() {

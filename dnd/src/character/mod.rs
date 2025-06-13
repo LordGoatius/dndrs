@@ -3,8 +3,8 @@ pub mod error;
 pub mod level;
 pub mod proficiencies;
 pub mod skills;
-pub mod stats;
 pub mod spells;
+pub mod stats;
 
 use std::{fmt::Display, ops::Index};
 
@@ -22,17 +22,18 @@ use crate::{
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Character<'a> {
-    level: Level,
-    stats: Stats,
-    skills: Skill,
-    saving_throws: SavingThrows,
-    speed: Speed,
+    pub name: &'a str,
+    pub level: Level,
+    pub stats: Stats,
+    pub skills: Skill,
+    pub saving_throws: SavingThrows,
+    pub speed: Speed,
     #[serde(borrow)]
-    class: Vec<Class<'a>>,
-    hp: usize,
-    proficiencies: Proficiencies<'a>,
+    pub class: Vec<(Class<'a>, Level)>,
+    pub hp: usize,
+    pub proficiencies: Proficiencies<'a>,
     // species: Species,
-    languages: Vec<Language<'a>>,
+    pub languages: Vec<Language<'a>>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -133,9 +134,11 @@ impl Character<'_> {
 
 #[cfg(test)]
 pub mod test {
+    use std::{fs, io::Write};
+
     use crate::{
         character::{
-            class::Subclass, proficiencies::Proficiencies, skills::Skill, Character, SavingThrows,
+            class::{consts::get_druid, ClassType, Subclass}, proficiencies::Proficiencies, skills::Skill, Character, SavingThrows,
             Speed,
         },
         dice,
@@ -147,6 +150,7 @@ pub mod test {
 
     #[test]
     fn char_debug() {
+        let name = "Liza";
         let level = Level::L07;
         let stats = Stats::try_from([12, 14, 14, 12, 20, 8]).unwrap();
         use super::Prof as P;
@@ -173,30 +177,7 @@ pub mod test {
 
         let class = {
             use Level::*;
-            vec![
-                Class {
-                    class_name: "Druid".into(),
-                    hit_dice: dice::consts::D8,
-                    level: Level::L06,
-                    asi: vec![L04, L08, L12, L16, L19],
-                    class_features: vec![],
-                    subclass: Subclass {
-                        subclass_name: "Circle of the Dire Beast",
-                        subclass_features: vec![],
-                    },
-                },
-                Class {
-                    class_name: "Warlock".into(),
-                    hit_dice: dice::consts::D8,
-                    level: Level::L01,
-                    asi: vec![L04, L08, L12, L16, L19],
-                    class_features: vec![],
-                    subclass: Subclass {
-                        subclass_name: "Warlock of the Thicket and Thorn",
-                        subclass_features: vec![],
-                    },
-                },
-            ]
+            vec![(get_druid().clone(), L06)]
         };
 
         let saving_throws = SavingThrows {
@@ -228,6 +209,7 @@ pub mod test {
         };
 
         let liza = Character {
+            name,
             level,
             stats,
             skills,
@@ -276,6 +258,10 @@ pub mod test {
             println!("{skill}");
             assert_eq!(liza.skill_bonus(skill), values[i]);
         }
+
+        let mut outfile = fs::File::create("liza.ron").unwrap();
+        let liza_json: String = ron::to_string(&liza).unwrap();
+        outfile.write(liza_json.as_bytes()).unwrap();
 
         println!("{liza:#?}");
     }

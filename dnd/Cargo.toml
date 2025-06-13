@@ -6,8 +6,11 @@ edition = "2024"
 [dependencies]
 anyhow = "1.0.98"
 approx = "0.5.1"
+collection_macros = "0.2.0"
 derive_more = { version = "2.0.1", features = ["display", "debug"] }
 rand = "0.9.1"
+ron = "0.10.1"
 serde = { version = "1.0.219", features = ["derive"] }
+serde_json = "1.0.140"
 thiserror = "2.0.12"
 tuirealm = "2.0.3"

@@ -1,9 +1,11 @@
+use std::borrow::Cow;
+
 use serde::{Deserialize, Serialize};
 
 use crate::cost::Cost;
 pub mod consts;
 
-#[derive(Debug, Serialize, Deserialize, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Clone, Copy, Debug, Serialize, Deserialize, PartialEq, Eq, PartialOrd, Ord)]
 pub enum SpellLevel {
     Cantrip,
     L1,    
@@ -17,7 +19,7 @@ pub enum SpellLevel {
     L9,    
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Spell<'a> {
     name: &'a str,
     level: SpellLevel,
@@ -28,7 +30,7 @@ pub struct Spell<'a> {
     range: &'a str,
     duration: &'a str,
     components: Components<'a>,
-    description: &'a str,
+    description: Cow<'a, str> ,
     // effect: MagicEffect<'a>,
 }
 
@@ -48,7 +50,7 @@ pub enum SpellRange {
     Range(usize),
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Copy, Debug, Serialize, Deserialize)]
 pub enum School {
     Transmutation,
     Divination,
@@ -60,7 +62,7 @@ pub enum School {
     Conjuration
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Components<'a> {
     verbal: bool,
     somatic: bool,
@@ -68,8 +70,38 @@ pub struct Components<'a> {
     material: Option<MaterialComponent<'a>>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct MaterialComponent<'a> {
     components: &'a str,
     cost: Option<Cost>
+}
+
+#[cfg(test)]
+pub mod tests {
+    use core::panic;
+    use std::borrow::Cow;
+
+    use serde::{Deserialize, Serialize};
+
+    use super::Spell;
+
+    #[test]
+    fn test_ron_spells() {
+        // #[derive(Debug, Serialize, Deserialize)]
+        // struct Description<'a> {
+        //     description: Cow<'a, str>,
+        // }
+
+        // let description  = crate::character::spells::consts::WISH.description;
+        // let description = Description { description };
+
+        let spell = crate::character::spells::consts::WISH;
+
+        let ron = ron::to_string(&spell).unwrap();
+        let spell_ron: Spell = ron::from_str(&ron).unwrap();
+
+        // let ron_desc = ron::to_string(&description).unwrap();
+        // println!("{ron_desc}");
+        // let desc_ron: Description = ron::from_str(&ron_desc).unwrap();
+    }
 }

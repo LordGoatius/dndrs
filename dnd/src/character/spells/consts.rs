@@ -1,3 +1,4 @@
+use std::borrow::Cow;
 use super::Spell;
 use super::{MaterialComponent, Components, School::*, SpellLevel::*};
 use crate::cost::Cost;
@@ -16,7 +17,7 @@ macro_rules! define_spell {
                 somatic: $som,
                 material: $mat,
             },
-            description: $desc,
+            description: Cow::Borrowed($desc),
         };
     };
 }

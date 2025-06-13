@@ -5,17 +5,6 @@ import re
 df = pd.read_csv("dnd-spells.csv")
 cols = ['name', 'classes', 'level', 'school', 'cast_time', 'range', 'duration', 'verbal', 'somatic', 'material', 'material_cost', 'description']
 
-# pub struct Spell<'a> {
-#     name: &'a str,
-#     level: SpellLevel,
-#     school: School,
-#     casting_time: Time,
-#     range: SpellRange,
-#     duration: SpellDuration,
-#     components: Components<'a>,
-#     description: &'a str,
-#     effect: MagicEffect<'a>,
-# }
 for (i, series) in df.iterrows():
     name: str = series['name']
     level = series['level']
@@ -26,6 +15,7 @@ for (i, series) in df.iterrows():
         level = "L" + str(level)
 
     school = series['school']
+    classes= series['classes'].split(", ")
     time = series["cast_time"]
     range = series["range"]
     duration = series["duration"]
@@ -82,18 +72,18 @@ for (i, series) in df.iterrows():
     #  $mat:expr,
     #  $desc:literal,
     #  $effect:literal
-    print("define_spell! {")
-    print(f"    {name_lit},")
-    print(f'    "{name.replace('"', '\\\"')}",')
-    print(f"    {level},")
-    print(f"    {school},")
-    print(f'    "{time}",')
-    print(f'    "{range}",')
-    print(f'    "{duration}",')
-    print(f"    {comp_v},")
-    print(f"    {comp_s},")
-    print(f"    {comp_m},")
-    print(f'    r#"{desc}"#')
-    print("}")
-
-    print("")
+    # print("define_spell! {")
+    # print(f"    {name_lit},")
+    # print(f'    "{name.replace('"', '\\\"')}",')
+    # print(f"    {level},")
+    # print(f"    {school},")
+    # print(f'    "{time}",')
+    # print(f'    "{range}",')
+    # print(f'    "{duration}",')
+    # print(f"    {comp_v},")
+    # print(f"    {comp_s},")
+    # print(f"    {comp_m},")
+    # print(f'    r#"{desc}"#')
+    # print("}")
+    if "Druid" in classes:
+        print(name_lit)
