@@ -1,0 +1,13 @@
+[package]
+name = "dndlang"
+version = "0.1.0"
+edition = "2024"
+
+[features]
+dndir = []
+
+[dependencies]
+lalrpop-util = { version = "0.22.2", features = ["lexer", "unicode"] }
+
+[build-dependencies]
+lalrpop = "0.22.0"

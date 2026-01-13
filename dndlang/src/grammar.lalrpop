@@ -1,0 +1,9 @@
+use crate::parser::ast::*;
+
+grammar;
+
+pub File: Program = {
+    Char => Program,
+}
+
+Char: String = <s:r".*"> => s.to_owned();

@@ -1,0 +1,43 @@
+# Importing a character from json?
+from "../path.json" import liza: Character
+# Importing a .dnd file
+from "../spells" import *
+
+print(liza.class)
+print(liza.prof)
+print(liza.spells)
+print(liza.level)
+
+spell = liza.cantrips["Eldritch Blast"]
+
+range(spell.attacks) |> foreach((attack)) => {
+    print(attack.roll)
+}
+
+for attack in spell.attacks {
+    print(attack.roll)
+}
+
+liza.spells |> foreach((spell) => {
+    if spell.attack != None:
+        print(roll spell.attack)
+})
+
+
+spells = [ELDRITCH_BLAST, FROST]
+
+# Built in types (that you can define your own of):
+# Character
+# Spell
+# Dice
+character Liza {
+}
+
+spell BlastingFragments {
+}
+
+class NewClass {}
+
+# Need a syntax for specifying a class to subclass
+subclass CircleDesert: Druid.Subclasses { # ?
+}
